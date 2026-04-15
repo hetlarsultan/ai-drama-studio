@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Drama Studio V6.3 - APK Fixed</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#010409;--card:#0d1117;--line:#30363d;--acc:#c084fc}
+body{background:var(--bg);color:#e6edf3;font-family:'Tajawal',system-ui;padding:8px;font-size:14px}
+.container{max-width:1350px;margin:auto}
+h1{text-align:center;color:var(--acc);margin:6px;font-size:24px}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:8px}
+@media(max-width:1050px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);padding:9px;border-radius:8px;border:1px solid var(--line);margin-bottom:8px}
+textarea{width:100%;height:140px;background:#010409;color:#e6edf3;border:1px solid var(--line);border-radius:6px;padding:7px;font-size:12px;font-family:monospace;resize:vertical}
+input,select,button{width:100%;padding:7px;margin:3px 0;border-radius:6px;background:#010409;color:#e6edf3;border:1px solid var(--line);font-size:13px}
+button{background:var(--acc);color:#000;font-weight:700;cursor:pointer;border:none}
+button:disabled{opacity:.3;cursor:not-allowed}
+.stage{position:relative;width:100%;aspect-ratio:16/9;background:#000;overflow:hidden;border-radius:8px}
+.bgvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
+.bgvid.active{opacity:1}
+.char{position:absolute;bottom:0;width:30%;transition:all .5s;opacity:0;z-index:5}
+.char.show{opacity:1}
+.char.left{left:3%} .char.right{right:3%;transform:scaleX(-1)}
+.char.active{filter:drop-shadow(0 0 25px var(--glow)) brightness(1.08);z-index:15}
+.char img{width:100%;filter:drop-shadow(0 8px 16px rgba(0,0,0,.8))}
+.mouth{position:absolute;width:15%;height:6%;left:42.5%;top:64%;background:#0a0000;border-radius:50%;opacity:0}
+.mouth.open{opacity:.95;animation:t .09s infinite alternate}
+@keyframes t{from{transform:scaleY(.3)}to{transform:scaleY(1)}}
+.expr{position:absolute;top:5%;left:50%;transform:translateX(-50%);font-size:28px;opacity:0;transition:.2s;z-index:20}
+.expr.show{opacity:1}
+.bubble{position:absolute;bottom:22%;left:50%;transform:translateX(-50%);max-width:74%;background:rgba(1,4,9,.93);padding:9px 12px;border-radius:8px;font-size:18px;font-weight:600;opacity:0;transition:.2s;border:2px solid;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.7);z-index:20}
+.bubble.show{opacity:1}
+.lib{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:160px;overflow:auto}
+.lib-item{cursor:pointer;border:2px solid #21262d;border-radius:5px;overflow:hidden;position:relative;background:#000;min-height:80px}
+.lib-item img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block}
+.lib-item.selected{border-color:var(--acc)}
+.lib-item span{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.85);font-size:9px;padding:1px;text-align:center}
+.lib-item .del{position:absolute;top:1px;left:1px;background:#dc2626;color:#fff;border:none;border-radius:3px;padding:0 4px;font-size:9px;cursor:pointer;line-height:1.2}
+.timeline{max-height:100px;overflow:auto;background:#010409;padding:5px;border-radius:5px;font-size:10px;font-family:monospace}
+.timeline .l{padding:1px 3px;border-right:2px solid var(--line);margin:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timeline .l.active{border-color:var(--acc);background:#161b22}
+video#out{width:100%;border-radius:6px;background:#000;margin-top:5px;min-height:200px}
+.small{font-size:10px;color:#7d8590;line-height:1.4}
+.flex{display:flex;gap:4px}
+.flex>*{flex:1}
+.tag{color:#58a6ff;font-weight:bold}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .4s}
+.err{position:fixed;bottom:10px;left:10px;right:10px;background:#dc2626;color:#fff;padding:10px;border-radius:6px;display:none;z-index:9999;font-size:12px}
+.err.show{display:block}
+</style>
+</head>
+<body>
+<div class="err" id="err"></div>
+<div class="container">
+<h1>🎬 AI Drama V6.3 - APK Fixed</h1>
+<div class="grid">
+<div>
+<div class="card">
+<h3>🧑‍🎨 الشخصيات</h3>
+<div class="lib" id="lib"></div>
+<div class="flex">
+<input id="newChar" placeholder="وصف: بنت حضرمية محجبة">
+<button onclick="addChar()" style="flex:0.5">✨</button>
+</div>
+</div>
+<div class="card">
+<h3>📝 السكريبت</h3>
+<textarea id="script">[SCENE: livingroom]
+[CAMERA: wide]
+رجل: يا رجل خليني اعيش. انا فاهمة.
+امرأة: [EMOTION: sad] انا للاسف ما توقعت يوصل فيني...
+
+[SCENE: hospital]
+[CAMERA: zoom-in]
+[EMOTION: sad]
+رجل: ليتني سمعتك من قبل
+طبيب: لازم ترتاح
+
+[SCENE: livingroom]
+[CAMERA: shake]
+[EMOTION: cry]
+رجل: [بكاء] سامحيني
+امرأة: [نبض] انا معك</textarea>
+<div class="small">الأوامر: <span class="tag">[SCENE: hospital/livingroom/mina]</span> <span class="tag">[CAMERA: zoom-in/wide/shake]</span> <span class="tag">[EMOTION: sad/happy/angry/cry]</span> <span class="tag">[بكاء]</span></div>
+<div class="flex">
+<button onclick="playMovie()" id="playBtn">▶️ إنتاج</button>
+<button onclick="saveVideo()" id="saveBtn" style="background:#3fb950" disabled>💾 حفظ MP4</button>
+</div>
+</div>
+<div class="card">
+<h3>📊 التايملاين</h3>
+<div class="timeline" id="tl"></div>
+<div class="small" id="status">جاهز - اختر شخصيتين واضغط إنتاج</div>
+</div>
+</div>
+<div>
+<div class="card">
+<div class="stage" id="stage">
+<video class="bgvid" id="bg0" loop muted playsinline crossorigin="anonymous"></video>
+<video class="bgvid" id="bg1" loop muted playsinline crossorigin="anonymous"></video>
+<div class="char left" id="cL"><img class="char-img" id="iL"><div class="mouth" id="mL"></div><div class="expr" id="eL"></div></div>
+<div class="char right" id="cR"><img class="char-img" id="iR"><div class="mouth" id="mR"></div><div class="expr" id="eR"></div></div>
+<div class="bubble" id="bub"></div>
+</div>
+<video id="out" controls></video>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+// تسجيل الأخطاء
+window.onerror=(m,s,l,c,e)=>{const d=document.getElementById('err');d.textContent=`خطأ: ${m} | ملف: ${s?.split('/').pop()} | سطر: ${l}`;d.classList.add('show');setTimeout(()=>d.classList.remove('show'),8000);return false};
+window.onunhandledrejection=e=>{const d=document.getElementById('err');d.textContent=`خطأ Promise: ${e.reason}`;d.classList.add('show');setTimeout(()=>d.classList.remove('show'),8000);};
+
+const DEFAULT_CHARS = [
+ {name:'رجل',url:'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjcxOCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjQwIiByPSIxMDAiIGZpbGw9IiNmZmRiZTIiLz48cmVjdCB4PSIxNTYiIHk9IjM1MCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiM2YjczODAiLz48L3N2Zz4=',gender:'ذكر'},
+ {name:'امرأة',url:'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjcxOCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjQwIiByPSIxMDAiIGZpbGw9IiNmZmRiZTIiLz48cmVjdCB4PSIxNTYiIHk9IjM1MCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNlYjU5YTIiLz48L3N2Zz4=',gender:'أنثى'},
+ {name:'طبيب',url:'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjcxOCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjQwIiByPSIxMDAiIGZpbGw9IiNmZmRiZTIiLz48cmVjdCB4PSIxNTYiIHk9IjM1MCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNmZmYiLz48L3N2Zz4=',gender:'ذكر'}
+];
+let chars=[]; try{chars=JSON.parse(localStorage.getItem('drama_chars_v63')||'null')||DEFAULT_CHARS;}catch(e){chars=DEFAULT_CHARS;}
+const scenes={livingroom:'https://cdn.coverr.co/videos/coverr-modern-living-room-4695/720p.mp4',hospital:'https://cdn.coverr.co/videos/coverr-hospital-corridor-4567/720p.mp4',mina:'https://cdn.coverr.co/videos/coverr-waves-crashing-on-rocks-5165/720p.mp4',souk:'https://cdn.coverr.co/videos/coverr-middle-eastern-market-7300/720p.mp4',desert:'https://cdn.coverr.co/videos/coverr-desert-dunes-8179/720p.mp4',night:'https://cdn.coverr.co/videos/coverr-night-sky-timelapse-2765/720p.mp4'};
+const sfx={بكاء:'https://cdn.pixabay.com/download/audio/2021/08/04/audio_5a9aed9d74.mp3',ضحكة:'https://cdn.pixabay.com/download/audio/2022/03/10/audio_2d49a82f75.mp3',نبض:'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c9c0c1e3c4.mp3',شهقة:'https://cdn.pixabay.com/download/audio/2022/03/24/audio_5f9d6e9f7d.mp3',وش:'https://cdn.pixabay.com/download/audio/2022/03/10/audio_46d8c2b5a2.mp3'};
+let audioCtx,masterDest,lastBlob=null,currentBg=0;const emotions={sad:'😢',happy:'😊',angry:'😡',cry:'😭',neutral:''};
+
+function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||webkitAudioContext)();masterDest=audioCtx.createMediaStreamDestination();}
+function status(t){document.getElementById('status').textContent=t;}
+function renderLib(){const lib=document.getElementById('lib');lib.innerHTML='';chars.forEach((c,i)=>{const d=document.createElement('div');d.className='lib-item';d.innerHTML=`<img src="${c.url}"><span>${c.name}</span><button class="del">×</button>`;d.querySelector('img').onclick=()=>pickChar(i);d.querySelector('.del').onclick=e=>{e.stopPropagation();chars.splice(i,1);saveLib();renderLib();};lib.appendChild(d);});}
+let selected={};function pickChar(i){if(!selected.left){selected.left=chars[i];document.getElementById('iL').src=chars[i].url;document.getElementById('cL').classList.add('show');document.querySelectorAll('.lib-item')[i].classList.add('selected');}else if(!selected.right){selected.right=chars[i];document.getElementById('iR').src=chars[i].url;document.getElementById('cR').classList.add('show');document.querySelectorAll('.lib-item')[i].classList.add('selected');}status(`اختيار: ${selected.left?.name}${selected.right?' + '+selected.right.name:''}`);}
+async function addChar(){const desc=document.getElementById('newChar').value||'شخصية عربية';const name=prompt('الاسم؟',desc.split(' ')[0])||'شخصية';const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(desc+', realistic cinematic portrait')}`+`?width=512&height=768&seed=${Date.now()}&nologo=true`;chars.push({name,url,gender:'ذكر'});saveLib();renderLib();}
+function saveLib(){localStorage.setItem('drama_chars_v63',JSON.stringify(chars));}
+renderLib();selected.left=chars[0];selected.right=chars[1];document.getElementById('iL').src=chars[0].url;document.getElementById('iR').src=chars[1].url;document.getElementById('cL').classList.add('show');document.getElementById('cR').classList.add('show');
+
+function parseScript(){const lines=document.getElementById('script').value.split('
+').filter(l=>l.trim());const shots=[];let cur={scene:'livingroom',camera:'wide'};lines.forEach(line=>{if(line.startsWith('[SCENE:'))cur.scene=line.match(/SCENE:\s*(\w+)/)?.[1]||'livingroom';else if(line.startsWith('[CAMERA:'))cur.camera=line.match(/CAMERA:\s*([\w-]+)/)?.[1]||'wide';else if(line.includes(':')){const[name,...rest]=line.split(':');const text=rest.join(':').trim();const emotion=line.match(/EMOTION:\s*(\w+)/)?.[1]||'neutral';const sfxTag=text.match(/\[(.+?)\]/)?.[1];shots.push({...cur,name:name.trim(),text:text.replace(/\[.+?\]/g,'').trim(),emotion,sfx:sfxTag});}});return shots;}
+function updateTL(shots,idx){const tl=document.getElementById('tl');tl.innerHTML='';shots.forEach((s,i)=>{const d=document.createElement('div');d.className='l'+(i===idx?' active':'');d.textContent=`${i+1}. ${s.name}: ${s.text.slice(0,28)} [${s.scene}]`;tl.appendChild(d);});}
+async function playSFX(key){if(!sfx[key])return;initAudio();const a=new Audio(sfx[key]);a.crossOrigin='anonymous';await a.play().catch(()=>{});const src=audioCtx.createMediaElementSource(a);src.connect(masterDest);src.connect(audioCtx.destination);}
+
+async function playMovie(){
+try{
+ document.getElementById('playBtn').disabled=true;status('يحضر...');
+ initAudio();const shots=parseScript();if(shots.length===0)throw new Error('اكتب سكريبت');
+ const canvas=document.createElement('canvas');canvas.width=1280;canvas.height=720;const ctx=canvas.getContext('2d');
+ const stream=canvas.captureStream(24);const mixed=new MediaStream([...stream.getVideoTracks(),...masterDest.stream.getAudioTracks()]);
+ const rec=new MediaRecorder(mixed,{mimeType:'video/webm;codecs=vp9'});const chunks=[];rec.ondataavailable=e=>chunks.push(e.data);rec.start();
+ const bgVids=[document.getElementById('bg0'),document.getElementById('bg1')];let bgIdx=0;
+ const charEls={left:document.getElementById('cL'),right:document.getElementById('cR')};
+ const imgEls={left:document.getElementById('iL'),right:document.getElementById('iR')};
+ const mouthEls={left:document.getElementById('mL'),right:document.getElementById('mR')};
+ const exprEls={left:document.getElementById('eL'),right:document.getElementById('eR')};
+ const bubble=document.getElementById('bub');const stage=document.getElementById('stage');
+ let activeChars={},lastScene='',drawActive=true;
+ function assignChar(name){if(activeChars[name])return activeChars[name];const pos=!activeChars.left?'left':'right';activeChars[name]=pos;const ch=chars.find(c=>c.name===name)||chars[0];imgEls[pos].src=ch.url;charEls[pos].classList.add('show');return pos;}
+ function draw(){if(!drawActive)return;ctx.drawImage(bgVids[bgIdx],0,0,1280,720);requestAnimationFrame(draw);}draw();
+ const voices=speechSynthesis.getVoices();if(voices.length===0)await new Promise(r=>{speechSynthesis.onvoiceschanged=r;});
+ for(let i=0;i<shots.length;i++){
+  updateTL(shots,i);const s=shots[i];status(`مشهد ${i+1}/${shots.length}`);
+  if(s.scene!==lastScene){bgIdx=1-bgIdx;bgVids[bgIdx].src=scenes[s.scene]||scenes.livingroom;await bgVids[bgIdx].play();bgVids[bgIdx].classList.add('active');bgVids[1-bgIdx].classList.remove('active');await playSFX('وش');lastScene=s.scene;}
+  stage.style.transform='scale(1)';if(s.camera==='zoom-in')stage.style.transform='scale(1.14)';if(s.camera==='shake'){stage.classList.add('shake');setTimeout(()=>stage.classList.remove('shake'),400);}
+  const pos=assignChar(s.name);Object.values(charEls).forEach(e=>e.classList.remove('active'));charEls[pos].classList.add('active');charEls[pos].style.setProperty('--glow',s.name===Object.keys(activeChars)[0]?'#38bdf8':'#f472b6');
+  exprEls[pos].textContent=emotions[s.emotion]||'';exprEls[pos].classList.add('show');setTimeout(()=>exprEls[pos].classList.remove('show'),1100);
+  bubble.className='bubble show';bubble.style.borderColor=s.name===Object.keys(activeChars)[0]?'#38bdf8':'#f472b6';bubble.textContent='';
+  for(let j=0;j<s.text.length;j++){bubble.textContent=s.text.slice(0,j+1);await new Promise(r=>setTimeout(r,20));}
+  const utt=new SpeechSynthesisUtterance(s.text);const vs=speechSynthesis.getVoices();utt.voice=vs.find(v=>v.lang.startsWith('ar')&&(s.name.includes('رجل')||s.name.includes('طبيب')?!v.name.includes('female'):true))||vs.find(v=>v.lang.startsWith('ar'));utt.rate=0.94;utt.pitch=s.name.includes('امرأة')?1.2:0.88;mouthEls[pos].classList.add('open');speechSynthesis.speak(utt);
+  if(s.sfx)await playSFX(s.sfx);
+  await new Promise(r=>utt.onend=r);mouthEls[pos].classList.remove('open');await new Promise(r=>setTimeout(r,280));bubble.classList.remove('show');
+ }
+ drawActive=false;rec.stop();rec.onstop=()=>{lastBlob=new Blob(chunks,{type:'video/webm'});document.getElementById('out').src=URL.createObjectURL(lastBlob);status('اكتمل ✅');document.getElementById('playBtn').disabled=false;document.getElementById('saveBtn').disabled=false;};
+}catch(e){status('خطأ: '+e.message);document.getElementById('playBtn').disabled=false;}
+}
+
+async function saveVideo(){
+ if(!lastBlob)return alert('شغّل الفيلم أولاً'); 
+ if(window.Capacitor&&window.Capacitor.Plugins.Filesystem){
+  const {Filesystem}=window.Capacitor.Plugins;
+  const reader=new FileReader();reader.readAsDataURL(lastBlob);reader.onloadend=async()=>{const base64=reader.result.split(',')[1];await Filesystem.writeFile({path:`Drama_${Date.now()}.webm`,data:base64,directory:'DOCUMENTS'});alert('حُفظ في المستندات');};
+ }else{
+  const a=document.createElement('a');a.href=URL.createObjectURL(lastBlob);a.download=`drama_${Date.now()}.webm`;a.click();
+ }
+}
+</script>
+</body>
+</html>
