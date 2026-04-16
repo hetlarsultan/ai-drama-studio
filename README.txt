@@ -1,38 +1,23 @@
-# AI Drama Studio V6.2 - APK
+# AI Drama Studio V6.3 - يبني بدون أخطاء
 
-## التثبيت السريع - 3 خطوات فقط:
+## بناء APK - 4 أوامر فقط
 
-### 1. ثبت المتطلبات
-npm install -g @capacitor/cli
-تحميل Android Studio: https://developer.android.com/studio
+1. npm install
+2. npx cap add android  
+3. npx cap sync android
+4. cd android && ./gradlew assembleDebug
 
-### 2. بناء APK
-cd drama_studio_apk
-npm install
-npx cap add android
-npx cap sync android
-npx cap build android --prod
+APK: android/app/build/outputs/apk/debug/app-debug.apk
 
-### 3. مكان APK
-android/app/build/outputs/apk/release/app-release-unsigned.apk
+## المميزات
+[SCENE: hospital/livingroom/mina/souk/desert/night] خلفيات فيديو HD
+[CAMERA: zoom-in/wide/shake] حركة كاميرا
+[EMOTION: sad/happy/angry/cry] تعبيرات 😢😡
+[بكاء] [ضحكة] [نبض] [شهقة] [وش] مؤثرات مدموجة
+مكتبة شخصيات تحفظ للأبد + توليد بالوصف
+lip-sync فم يتحرك مع الصوت
+تفريق أصوات رجل/امرأة/طبيب
+تصدير WebM يعمل على كل الجوالات
 
-## للتوقيع والنشر:
-cd android && ./gradlew assembleRelease
-
-## المميزات المضمنة:
-✅ [SCENE: hospital/livingroom/mina/souk/desert/night]
-✅ [CAMERA: zoom-in/wide/shake] 
-✅ [EMOTION: sad/happy/angry/cry]
-✅ [بكاء] [ضحكة] [نبض] [شهقة] [وش]
-✅ مكتبة شخصيات تحفظ للأبد
-✅ خلفيات فيديو حقيقية HD
-✅ lip-sync فم يتحرك مع الصوت
-✅ تفريق أصوات رجل/امرأة/طبيب
-✅ تصدير MP4 يعمل أوفلاين
-✅ يعمل بدون نت بعد أول تشغيل
-
-## حل المشاكل:
-إذا ظهرت شاشة سوداء: تأكد أنك فتحت التطبيق بعد "npx cap sync android" وليس قبله.
-إذا الصوت لا يعمل: اضغط على الشاشة مرة أولاً - أندرويد يطلب تفاعل المستخدم.
-
-جاهز 100% للبناء. كل المميزات مفعلة.
+## حل مشكلة البناء
+إذا ظهر خطأ: احذف مجلد android وشغل npx cap add android من جديد
