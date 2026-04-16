@@ -19,18 +19,22 @@ jobs:
           
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          api-level: 34
+          build-tools: 34.0.0
           
       - run: npm install -g @capacitor/cli
       - run: npm install
       - run: cap add android
       - run: cap sync android
       
-      - name: Build APK with full logs
+      - name: Build APK Debug
         run: |
           cd android
           chmod +x gradlew
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          ./gradlew assembleDebug --no-daemon --stacktrace --info
+          echo "org.gradle.jvmargs=-Xmx2048m" >> gradle.properties
+          ./gradlew assembleDebug --no-daemon --stacktrace
           
       - uses: actions/upload-artifact@v4
         with:
