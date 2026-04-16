@@ -37,8 +37,8 @@ jobs:
         run: cap sync android
         
       - name: Build APK
-        run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
-        
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon --stacktrace --info
+         
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
